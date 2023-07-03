@@ -148,3 +148,44 @@ int LevenshteinAlignment(const std::vector<int> &a,
   ReverseVector(output);
   return e[M][N];
 }
+
+
+int LevenshteinEditDistance(const std::vector<std::tuple<int, float, float>> &ref,
+                              const std::vector<std::tuple<int, float, float>> &hyp,
+                              const float threshold,
+                              const int ins_cost, const int del_cost, const int sub_cost, const int str_cost) {
+  // create two work vectors for previous and current row
+  std::vector<int> e(ref.size()+1);
+  std::vector<int> cur_e(ref.size()+1);
+  // initialize the first hypothesis aligned to the reference at each
+  // position:[hyp_index =0][ref_index]
+  for (size_t i =0; i < e.size(); i ++) {
+    e[i] = i*del_cost;
+  }
+
+  // for other alignments
+  for (size_t hyp_index = 1; hyp_index <= hyp.size(); hyp_index ++) {
+    cur_e[0] = e[0] + ins_cost;
+    for (size_t ref_index = 1; ref_index <= ref.size(); ref_index ++) {
+      int ins_err = e[ref_index] + ins_cost;
+      int del_err = cur_e[ref_index-1] + del_cost;
+      int sub_err;
+      if (std::get<0>(hyp[hyp_index-1]) == std::get<0>(ref[ref_index-1])) {
+        if (std::get<2>(hyp[hyp_index-1]) <= std::get<2>(ref[ref_index-1]) + threshold) {
+          sub_err = e[ref_index-1];
+        } else {
+          sub_err = e[ref_index-1] + str_cost;
+        }
+      } else {
+        sub_err = e[ref_index-1] + sub_cost;
+      }
+
+      // Get minimum error type and update the current error vector.
+      int cur_err = std::min(std::min(ins_err, del_err), sub_err);
+      cur_e[ref_index] = cur_err;
+    }
+    e = cur_e;  // alternate for the next recursion.
+  }
+  size_t ref_index = e.size()-1;
+  return e[ref_index];
+}

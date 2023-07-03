@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <tuple>
 #include <cassert>
+#include <iostream>
 
 #define INS_COST 1
 #define DEL_COST 1
@@ -42,3 +44,10 @@ int LevenshteinAlignment(const std::vector<int> &a,
                          int eps_symbol,
                          const bool sclite_mode,
                          std::vector<std::pair<int, int> > *output);
+
+
+// Overloading for streaming edit distance.
+int LevenshteinEditDistance(const std::vector<std::tuple<int, float, float>> &ref,
+                            const std::vector<std::tuple<int, float, float>> &hyp,
+                            const float threshold,
+                            const int ins_cost, const int del_cost, const int sub_cost, const int str_cost);
